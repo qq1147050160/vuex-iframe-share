@@ -3,24 +3,19 @@ This is a package for data synchronization of vuex data in iframe in the vuejs p
 
 
 ## Introduce
----
 Engineers who use vuejs should know what vuex is! It is an essential tool in actual development. But when we use vuejs + iframe to develop applications, we will find that data communication is a headache. You need to use `postMessage` every time. To solve this problem, `vuex-iframe-share` is born. Let the vuex in the current day's Vue and the vuex in iframe share data. If your iframe doesn't use vuejs, it doesn't matter, `vuex-iframe-share` will store the data in the` window.localStorage `In.
 
 ## Characteristic
----
 - Automated
 - Real time change
 - The bag is very small
 
 ## Installation
----
-> yarn add vuex-iframe-share
-> or
-> npm install vuex-iframe-share
+> yarn add vuex-iframe-share # or npm install vuex-iframe-share
 
 ## Params
----
 > vuexIframeShare.parant(option)
+
 > vuexIframeShare.child(option)
 
 ```
@@ -36,7 +31,7 @@ option: {
 ---
 
 > `In VueJS`
-```
+```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
 const store = new Vuex.Store({
@@ -48,7 +43,7 @@ const store = new Vuex.Store({
 ```
 
 > `In IFrame（vuejs）`
-```
+```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
 const store = new Vuex.Store({
@@ -61,7 +56,7 @@ const store = new Vuex.Store({
 
 ### Note：not currently available
 > `In IFrame（not vuejs）`
-```
+```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
 // Mount
