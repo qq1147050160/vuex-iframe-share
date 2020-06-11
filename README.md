@@ -11,26 +11,35 @@ Engineers who use vuejs should know what vuex is! It is an essential tool in act
 - The bag is very small
 
 ## Installation
-> yarn add vuex-iframe-share # or npm install vuex-iframe-share
+```
+// Run
+yarn add vuex-iframe-share
+npm install vuex-iframe-share
+```
 
 ## Params
-> vuexIframeShare.parant(option)
-
-> vuexIframeShare.child(option)
-
 ```
+vuexIframeShare.parant(option)
+vuexIframeShare.child(option)
+vuexIframeShare.storage(option)
+```
+
+```typescript
 option: {
-  // share # mutual transmission(default)
+  // share # mutual transmission (default)
   // single # receive only and not send
   mode?: 'single' | 'share'
-  only?: string[] // receive only the specified keys
+  only?: string[] // receive only the specified keys,It also includes the modules name, because the modules name is also stored in the state
+
+  // This parameter is only available in vuexIframeShare.storage Valid in. In vuejs, please use such as: `vuex-persistedstate ...` package
+  storage?: Storage // sessionStorage | localStorage (default)
 }
 ```
 
 ## Usage
----
 
-> `In VueJS`
+> In VueJS
+
 ```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
@@ -42,7 +51,8 @@ const store = new Vuex.Store({
 });
 ```
 
-> `In IFrame（vuejs）`
+> In IFrame（vuejs）
+
 ```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
@@ -54,18 +64,32 @@ const store = new Vuex.Store({
 });
 ```
 
-### Note：not currently available
-> `In IFrame（not vuejs）`
+> In IFrame（not vuejs）
+
 ```typescript
 import vuexIframeShare from "vuex-iframe-share";
  
 // Mount
 const state = vuexIframeShare.storage();
 
-// Getter
-state.get('data')
+// Getter or Modules Getter
+const data = state.get('data')
+const data = state.get('moduleName/data')
 
-// Setter
+// Setter or Modules Setter
 state.set('data', here is to save the data)
+state.set('moduleName/data', here is to save the data)
 
+// It is worth mentioning that after setter, there are the latest vuex results, so we can do this:
+const vuexData = state.set('data', here is to save the data)
+
+// You can also use structure assignment
+const { ... } = state.set('data', here is to save the data)
 ```
+
+## 
+
+If you find any problem, you can give me the issue feedback in GitHub. I will reply after receiving it. Thank you for using this plug-in
+
+
+<!-- ## Thanks -->
