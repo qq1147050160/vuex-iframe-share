@@ -185,8 +185,9 @@ class VuexIframeShare {
   }
 
   private static storageGet(stateName: string = ''): any {
-    const [rootModule, stateKey] = stateName.split('/')
     const vuexData = this.get('vuex')
+    if (!stateName) return vuexData
+    const [rootModule, stateKey] = stateName.split('/')
     // 如果stateKey存在说明是modeles
     if (stateKey) return vuexData?.[rootModule]?.[stateKey]
     return vuexData?.[rootModule]

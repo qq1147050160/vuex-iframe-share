@@ -73,8 +73,9 @@ import vuexIframeShare from "vuex-iframe-share";
 const state = vuexIframeShare.storage();
 
 // Getter or Modules Getter
+const vuexData = state.get()
 const data = state.get('data')
-const data = state.get('moduleName/data')
+const moduleData = state.get('moduleName/data')
 
 // Setter or Modules Setter
 state.set('data', here is to save the data)
