@@ -36,6 +36,8 @@ class VuexIframeShare {
 
   // iframe 加载完毕，通知父框发送数据
   private static childLoaded() {
+    // 检查是否是iframe 中
+    if (window.parent === window) return
     window?.parent?.postMessage({ type: 'vuex-iframe-share-loaded' }, '*')
   }
 
