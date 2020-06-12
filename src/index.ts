@@ -208,10 +208,13 @@ class VuexIframeShare {
 
   private static storageSet(stateName: string = '', data: any) {
     if (!stateName) return
-    const vuexData = this.get('vuex')
+    const vuexData = this.get('vuex') || {}
     const [rootModule, stateKey] = stateName.split('/')
     // 如果stateKey存在说明是modeles
-    if (stateKey && vuexData?.[rootModule]) {
+    if (stateKey) {
+      if (vuexData[rootModule] === void 0) {
+        vuexData[rootModule] = {}
+      }
       vuexData[rootModule][stateKey] = data
       this.set('vuex', vuexData)
     } else {
@@ -225,7 +228,7 @@ class VuexIframeShare {
       const state = vuexData
       this.send(el, { mutation, state })
     }
-    return vuexData || {}
+    return vuexData
   }
 }
 

@@ -20,6 +20,7 @@ Engineers who use vuejs should know what vuex is! It is an essential tool in act
 
 ## 🔔 Updated
 
+- fix：`state.set('module/data', ...)`: Uncaught TypeError: Cannot read property 'module' of null（v1.0.7）
 - feat：working with `vuex-persistedstate`, new option `mutationMethodName`（v1.0.6）
 - fix：`vuexIframeShare.storage` error reporting for null（v1.0.5）
 - <a href="https://github.com/qq1147050160/vuex-iframe-share/blob/master/UPDATED.md">Intact Updated Docs</a>
@@ -43,7 +44,7 @@ Engineers who use vuejs should know what vuex is! It is an essential tool in act
 ### NPM
 
 ```bash
-npm install vuex-iframe-share
+npm install --save vuex-iframe-share
 ```
 
 ### YARN
@@ -130,12 +131,12 @@ const { ... } = state.set('data', here is to save the data)
 ## Working with vuex-persistedstate
 
 <b>What is `vuex-persistedstate` ？</b>
-- 简单来说就是让vuex 的数据，同步并且持久化保存在 (local|session)Storage 中或其他存储方式，以便刷新后还能继续使用
-- 具体不在这里详细说明，可以到 查看：[vuex-persistedstate](https://www.npmjs.com/package/vuex-persistedstate)
+- Simply put, it is to synchronize and persist the data of vuex in `(local|session)Storage` or other storage methods so that it can be used again after refreshing
+- The details are not explained here. You can go to check：[vuex-persistedstate](https://www.npmjs.com/package/vuex-persistedstate)
 
-#### 目前存在什么问题？
+#### What are the current problems？
 
-`vuex-iframe-share` 同步的数据只同步到了实时内存中，并没有更新储存到 Storage 中，这不是BUG，这与 `vuex-persistedstate` 插件的更新机制有关。我们可以这样做，来解决这个问题：
+The data synchronized by `vuex-iframe-share` is only synchronized to memory, and no update is stored in storage，This is not bug，This is related to the update mechanism of `vuex-persistedstate`. We can do this to solve this problem
 
 ```typescript
 // in `store.js`

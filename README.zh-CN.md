@@ -43,7 +43,7 @@
 ### NPM
 
 ```bash
-npm install vuex-iframe-share
+npm install --save vuex-iframe-share
 ```
 
 ### YARN
