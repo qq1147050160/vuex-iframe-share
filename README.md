@@ -73,6 +73,8 @@ option: {
   // This parameter is only available in vuexIframeShare.storage Valid in.
   // In vuejs, please use such as: `vuex-persistedstate ...` package
   storage?: Storage // sessionStorage | localStorage (default)
+
+  mutationMethodName?: string // It will only take effect if it is used in conjunction with 'vuex-persistedstate'
 }
 ```
 
@@ -143,24 +145,18 @@ The data synchronized by `vuex-iframe-share` is only synchronized to memory, and
 import vuexIframeShare from "vuex-iframe-share";
  
 const store = new Vuex.Store({
-  state: {
-    ...
-  },
   mutations: {
     // Add refresh method here, recommended use Object.assign
     save(state, payload) {
       Object.assign(state, payload)
-    },
+    }
     ...
   },
   plugins: [
-    // Essentially, let `vuex-iframe-share` once store.commit('save', {}) This triggers the update。
-    // note: When mutationMethodName is executed, an empty object “{}” is passed in。
-    // If follow the above practice, don't need to do anything, otherwise need to pay attention
-    vuexIframeShare.parant({ mutationMethodName: 'save' }) // mutations -> save (name)
-
-    // Or use the module mode. Of course, it doesn't make any difference. It's just to trigger the refresh. That's all
-    vuexIframeShare.parant({ mutationMethodName: 'moduleName/save' })
+    //In principle, let 'vuex iframe share' execute once store.commit ('save ', {}), execution will trigger the update!
+    //Note: there is a value when executing 'Save': '{}' if you write like me above, you don't need to do any processing, otherwise you need to filter '{}'
+    //Or write it in the module: 'modulename / save', of course, it doesn't make any difference, just to trigger the refresh
+    vuexIframeShare.parant({ mutationMethodName: 'save' })
   ]
 });
 

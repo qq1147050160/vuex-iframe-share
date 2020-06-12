@@ -72,6 +72,8 @@ option: {
   // 此参数仅在vuexIframeShare.storage在中有效。
   // 在vuejs中，请使用如下代码包：`vuex-persistedstate…` 代替
   storage?: Storage // sessionStorage | localStorage (默认)
+
+  mutationMethodName?: string // 只有与 'vuex-persistedstate' 一起使用时，它才会生效
 }
 ```
 
@@ -142,23 +144,18 @@ const { ... } = state.set('data', here is to save the data)
 import vuexIframeShare from "vuex-iframe-share";
  
 const store = new Vuex.Store({
-  state: {
-    ...
-  },
   mutations: {
     // 在这里添加保存数据的方法，建议使用 Object.assign
     save(state, payload) {
       Object.assign(state, payload)
-    },
+    }
     ...
   },
   plugins: [
-    // 这里将 mutations 中的 save方法名字传入。 
-    // 本质上 就是让 vuex-iframe-share 执行了一次 store.commit('save', {}), 这就触发了更新
-    // 注意： 调用 mutationMethodName 时候是有个空对象 “{}” 如果你是按照我上面的写法，不用做任何处理，如果是其他 是需要留意的
+    // 原理上就是让`vuex-iframe-share`执行一次 store.commit('save', {}), 执行就会触发更新！
+    // 注意：执行 'save' 时是有值的：“{}” 如果你和我上面写法一样，不用做任何处理，否则需要过滤 “{}”
+    // 或者写在模块中：'moduleName/save' 当然这没什么区别，只是为了触发刷新 仅此而已
     vuexIframeShare.parant({ mutationMethodName: 'save' })
-    // 或者使用模块方式， 当然这没什么区别，只是为了触发刷新 仅此而已
-    vuexIframeShare.parant({ mutationMethodName: 'moduleName/save' })
   ]
 });
 
