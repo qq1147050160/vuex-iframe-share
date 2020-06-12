@@ -1,6 +1,6 @@
 {
   "name": "vuex-iframe-share",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "This is a package for data synchronization of vuex data in iframe in the vuejs project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

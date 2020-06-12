@@ -15,8 +15,6 @@ interface ShareSendParams {
 }
 
 class VuexIframeShare {
-  private static timer: any = null
-
   private static lastdata: any = {}
 
   private static option: StorageRuleOption = {}
@@ -44,11 +42,7 @@ class VuexIframeShare {
 
   // 发送方法
   private static send(el: Window, option: ShareSendParams = {}) {
-    clearTimeout(this.timer)
-    // 因为每次都是发送全量数据，所以优化下发送次数
-    this.timer = setTimeout(() => {
-      el?.postMessage({ type: 'vuex-iframe-share', ...option }, '*')
-    }, 100)
+    el?.postMessage({ type: 'vuex-iframe-share', ...option }, '*')
   }
 
   // 接收方法
