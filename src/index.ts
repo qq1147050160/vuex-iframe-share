@@ -4,6 +4,7 @@ import { event } from '@ice/stark-data'
 interface RuleOption {
   mode?: 'single' | 'share' // share 双向的(默认) single 单向的
   only?: string[] // 只接收指定的key
+  mutationMethodName?: string // 触发vuex-persistedstate更新的方法名
 }
 interface StorageRuleOption extends RuleOption {
   storage?: Storage
@@ -74,7 +75,7 @@ class VuexIframeShare {
    * @param only 只接收指定的key
    */
   public static parant(option: RuleOption = {}): Plugin<any> {
-    const { mode = 'share', only = [] } = option
+    const { mode = 'share', only = [], mutationMethodName } = option
     window.removeEventListener('message', this.receive.bind(this))
     window.addEventListener('message', this.receive.bind(this))
     return store => {
@@ -91,9 +92,13 @@ class VuexIframeShare {
             store.state[key] = data[key]
           }
         })
+        // 如果传入更新方法名字就执行更新
+        if (mutationMethodName) store.commit(mutationMethodName, {})
       })
       // 父向子发送数据
       store.subscribe((mutation, state) => {
+        // eslint-disable-next-line no-void
+        if (state === void 0) return
         this.lastdata = { mutation, state }
         if (mode === 'share') {
           const el = document.querySelector('iframe')?.contentWindow
@@ -109,7 +114,7 @@ class VuexIframeShare {
    * @param only 只接收指定的key
    */
   public static child(option: RuleOption = {}): Plugin<any> {
-    const { mode = 'share', only = [] } = option
+    const { mode = 'share', only = [], mutationMethodName } = option
     window.removeEventListener('message', this.receive.bind(this))
     window.addEventListener('message', this.receive.bind(this))
     // 子组件加载完成，通知父组件
@@ -129,9 +134,13 @@ class VuexIframeShare {
             store.state[key] = data[key]
           }
         })
+        // 如果传入更新方法名字就执行更新
+        if (mutationMethodName) store.commit(mutationMethodName, {})
       })
       // 向父发送数据
       store.subscribe((mutation, state) => {
+        // eslint-disable-next-line no-void
+        if (state === void 0) return
         if (mode === 'share') {
           const el = window.parent
           this.send(el, { mutation, state })
@@ -165,6 +174,7 @@ class VuexIframeShare {
 
   // storage.getItem
   private static get(name: string): any {
+    // eslint-disable-next-line no-underscore-dangle
     const _storage = this.option.storage
     let value = _storage.getItem(name)
     try {
@@ -177,6 +187,7 @@ class VuexIframeShare {
 
   // storage.setItem
   private static set(name: string, value: any): void {
+    // eslint-disable-next-line no-underscore-dangle
     const _storage = this.option.storage
     try {
       value = JSON.stringify(value)

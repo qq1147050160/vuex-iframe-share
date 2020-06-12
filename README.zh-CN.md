@@ -18,6 +18,12 @@
 - 实时变化
 - 可定制
 
+## 🔔 Updated
+
+- 新功能：与 `vuex-persistedstate` 一起工作, 新选项 `mutationMethodName`（v1.0.6）
+- 修复：`vuexIframeShare.storage` 为空报错（v1.0.5）
+- <a href="https://github.com/qq1147050160/vuex-iframe-share/blob/master/UPDATED.md">完整更新文档</a>
+
 ## 🔧 要求
 
 - [Vue.js](https://vuejs.org) (v2.0.0+)
@@ -119,6 +125,43 @@ const vuexData = state.set('data', here is to save the data)
 
 // 也可以使用结构赋值
 const { ... } = state.set('data', here is to save the data)
+```
+
+## 搭配 vuex-persistedstate 插件使用
+
+<b>什么是`vuex-persistedstate` ？</b>
+- 简单来说就是让vuex 的数据，同步并且持久化保存在 (local|session)Storage 中或其他存储方式，以便刷新后还能继续使用
+- 具体不在这里详细说明，可以到 查看：[vuex-persistedstate](https://www.npmjs.com/package/vuex-persistedstate)
+
+#### 目前存在什么问题？
+
+`vuex-iframe-share` 同步的数据只同步到了实时内存中，并没有更新储存到 Storage 中，这不是BUG，这与 `vuex-persistedstate` 插件的更新机制有关。我们可以这样做，来解决这个问题：
+
+```typescript
+// in `store.js`
+import vuexIframeShare from "vuex-iframe-share";
+ 
+const store = new Vuex.Store({
+  state: {
+    ...
+  },
+  mutations: {
+    // 在这里添加保存数据的方法，建议使用 Object.assign
+    save(state, payload) {
+      Object.assign(state, payload)
+    },
+    ...
+  },
+  plugins: [
+    // 这里将 mutations 中的 save方法名字传入。 
+    // 本质上 就是让 vuex-iframe-share 执行了一次 store.commit('save', {}), 这就触发了更新
+    // 注意： 调用 mutationMethodName 时候是有个空对象 “{}” 如果你是按照我上面的写法，不用做任何处理，如果是其他 是需要留意的
+    vuexIframeShare.parant({ mutationMethodName: 'save' })
+    // 或者使用模块方式， 当然这没什么区别，只是为了触发刷新 仅此而已
+    vuexIframeShare.parant({ mutationMethodName: 'moduleName/save' })
+  ]
+});
+
 ```
 
 ## 
