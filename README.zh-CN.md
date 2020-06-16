@@ -20,6 +20,9 @@
 
 ## 🔔 Updated
 
+- 修复：优化刷新方法执行不向iframe 传递通知（v1.0.9）
+- 修复：取消100ms延迟传输优化，因为延迟可能导致数据无法及时更新（v1.0.8）
+- 修复：`state.set('module/data', ...)`: Uncaught TypeError: Cannot read property 'module' of null（v1.0.7）
 - 新功能：与 `vuex-persistedstate` 一起工作, 新选项 `mutationMethodName`（v1.0.6）
 - 修复：`vuexIframeShare.storage` 为空报错（v1.0.5）
 - <a href="https://github.com/qq1147050160/vuex-iframe-share/blob/master/UPDATED.md">完整更新文档</a>

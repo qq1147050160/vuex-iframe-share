@@ -35,7 +35,6 @@ class VuexIframeShare {
 
   // iframe 加载完毕，通知父框发送数据
   private static childLoaded() {
-    // 检查是否是iframe 中
     if (window.parent === window) return
     window?.parent?.postMessage({ type: 'vuex-iframe-share-loaded' }, '*')
   }
@@ -47,8 +46,9 @@ class VuexIframeShare {
 
   // 接收方法
   private static receive({ data }) {
+    const vm = (window as any).vm || (window as any).$vm
     const { type, ...args } = data || {}
-    const vm: any = (window as any).vm || (window as any).$vm
+
     if (!type) return
     if (type === 'vuex-iframe-share') event.emit('VUE_IFRAME_SHARE_RECEIVE', { ...args })
     if (type === 'vuex-iframe-share-loaded') {
@@ -58,16 +58,11 @@ class VuexIframeShare {
         this.lastdata.state = vm.$store.state
       }
       this.send(el, this.lastdata)
-      // eslint-disable-next-line no-underscore-dangle
-      vm.$store.state._vuexIframeShareLoaded = true
+      vm.$store.state.vuex_iframe_share_loaded = true
     }
   }
 
-  /**
-   * 项目中
-   * @param mode share 双向的(默认) single 单向的
-   * @param only 只接收指定的key
-   */
+  // main mount
   public static parant(option: RuleOption = {}): Plugin<any> {
     const { mode = 'share', only = [], mutationMethodName } = option
     window.removeEventListener('message', this.receive.bind(this))
@@ -87,13 +82,19 @@ class VuexIframeShare {
           }
         })
         // 如果传入更新方法名字就执行更新
-        if (mutationMethodName) store.commit(mutationMethodName, {})
+        if (mutationMethodName) {
+          localStorage.VUE_IFRAME_SHARE_UPDATE = true
+          store.commit(mutationMethodName, {})
+        }
       })
       // 父向子发送数据
       store.subscribe((mutation, state) => {
-        // eslint-disable-next-line no-void
-        if (state === void 0) return
         this.lastdata = { mutation, state }
+        // eslint-disable-next-line no-void
+        if (state === void 0 || localStorage.VUE_IFRAME_SHARE_UPDATE) {
+          localStorage.VUE_IFRAME_SHARE_UPDATE = false
+          return
+        }
         if (mode === 'share') {
           const el = document.querySelector('iframe')?.contentWindow
           this.send(el, { mutation, state })
@@ -102,11 +103,7 @@ class VuexIframeShare {
     }
   }
 
-  /**
-   * iframe中
-   * @param mode share 双向的(默认) single 单向的
-   * @param only 只接收指定的key
-   */
+  // iframe
   public static child(option: RuleOption = {}): Plugin<any> {
     const { mode = 'share', only = [], mutationMethodName } = option
     window.removeEventListener('message', this.receive.bind(this))
@@ -129,12 +126,19 @@ class VuexIframeShare {
           }
         })
         // 如果传入更新方法名字就执行更新
-        if (mutationMethodName) store.commit(mutationMethodName, {})
+        if (mutationMethodName) {
+          localStorage.VUE_IFRAME_SHARE_UPDATE = true
+          store.commit(mutationMethodName, {})
+        }
       })
       // 向父发送数据
       store.subscribe((mutation, state) => {
+        this.lastdata = { mutation, state }
         // eslint-disable-next-line no-void
-        if (state === void 0) return
+        if (state === void 0 || localStorage.VUE_IFRAME_SHARE_UPDATE) {
+          localStorage.VUE_IFRAME_SHARE_UPDATE = false
+          return
+        }
         if (mode === 'share') {
           const el = window.parent
           this.send(el, { mutation, state })
@@ -158,7 +162,7 @@ class VuexIframeShare {
     // 接收父发送的数据
     event.on('VUE_IFRAME_SHARE_RECEIVE', ({ mutation, state }) => {
       const data = this.pick(state, only)
-      this.set('vuex', data)
+      this.setItem('vuex', data)
     })
     return {
       get: this.storageGet.bind(this),
@@ -166,11 +170,9 @@ class VuexIframeShare {
     }
   }
 
-  // storage.getItem
-  private static get(name: string): any {
-    // eslint-disable-next-line no-underscore-dangle
-    const _storage = this.option.storage
-    let value = _storage.getItem(name)
+  private static getItem(name: string): any {
+    const { storage } = this.option
+    let value = storage.getItem(name)
     try {
       value = JSON.parse(value)
     } catch (e) {
@@ -179,20 +181,18 @@ class VuexIframeShare {
     return value
   }
 
-  // storage.setItem
-  private static set(name: string, value: any): void {
-    // eslint-disable-next-line no-underscore-dangle
-    const _storage = this.option.storage
+  private static setItem(name: string, value: any): void {
+    const { storage } = this.option
     try {
       value = JSON.stringify(value)
     } catch (e) {
       value = ''
     }
-    _storage.setItem(name, value)
+    storage.setItem(name, value)
   }
 
   private static storageGet(stateName: string = ''): any {
-    const vuexData = this.get('vuex') || {}
+    const vuexData = this.getItem('vuex') || {}
     if (!stateName) return vuexData
     const [rootModule, stateKey] = stateName.split('/')
     // 如果stateKey存在说明是modeles
@@ -202,18 +202,18 @@ class VuexIframeShare {
 
   private static storageSet(stateName: string = '', data: any) {
     if (!stateName) return
-    const vuexData = this.get('vuex') || {}
+    const vuexData = this.getItem('vuex') || {}
     const [rootModule, stateKey] = stateName.split('/')
     // 如果stateKey存在说明是modeles
     if (stateKey) {
-      if (vuexData[rootModule] === void 0) {
+      if (vuexData[rootModule] === undefined) {
         vuexData[rootModule] = {}
       }
       vuexData[rootModule][stateKey] = data
-      this.set('vuex', vuexData)
+      this.setItem('vuex', vuexData)
     } else {
       vuexData[rootModule] = data
-      this.set('vuex', vuexData)
+      this.setItem('vuex', vuexData)
     }
     // 检查是否存在双向更新
     if (this.option.mode === 'share') {
