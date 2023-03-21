@@ -1,6 +1,6 @@
 {
   "name": "vuex-iframe-share",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "This is a package for data synchronization of vuex data in iframe in the vuejs project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,10 +20,9 @@
     "vuex iframe share"
   ],
   "main": "./dist/vuex-iframe-share.umd.min.js",
-  "module": "./dist/vuex-iframe-share.mjs",
+  "module": "./dist/vuex-iframe-share.esm.js",
   "unpkg": "./dist/vuex-iframe-share.umd.min.js",
   "types": "./dist/index.d.ts",
-  "type": "./dist/index.d.ts",
   "files": [
     "dist",
     "src"
@@ -31,9 +30,11 @@
   "author": "qq1147050160@qq.com",
   "license": "ISC",
   "dependencies": {
-    "@ice/stark-data": "^0.1.2"
+    "@ice/stark-data": "^0.1.2",
+    "lodash.isequal": "^4.5.0"
   },
   "devDependencies": {
+    "@types/lodash.isequal": "^4.5.6",
     "father-build": "^1.17.2",
     "typescript": "^3.8.3",
     "vue": "^2.6.11",

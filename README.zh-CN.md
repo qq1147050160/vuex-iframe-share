@@ -20,6 +20,8 @@
 
 ## 🔔 Updated
 
+- 优化：`store.state` 的更新值 === 原始值情况，将不在触发 `set` 函数，防止`watch`被滥用情况（v1.0.10）
+- 修复：增加`window.parant` 检查，防止在非iframe 中使用，可能会出现死循环情况（v1.0.10）
 - 修复：优化刷新方法执行不向iframe 传递通知（v1.0.9）
 - 修复：取消100ms延迟传输优化，因为延迟可能导致数据无法及时更新（v1.0.8）
 - 修复：`state.set('module/data', ...)`: Uncaught TypeError: Cannot read property 'module' of null（v1.0.7）

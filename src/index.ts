@@ -1,5 +1,6 @@
 import { Plugin } from 'vuex'
 import { event } from '@ice/stark-data'
+import isEqual from 'lodash.isequal'
 
 interface RuleOption {
   mode?: 'single' | 'share' // share 双向的(默认) single 单向的
@@ -71,18 +72,23 @@ class VuexIframeShare {
       // 接收子发送的数据
       event.on('VUE_IFRAME_SHARE_RECEIVE', ({ mutation, state }) => {
         const data = this.pick(state, only)
+        let isValueChange = false
         Object.keys(data).forEach((key: string) => {
-          // 如果当前vuex 存在相同的模块
-          if (store.state[key] && typeof store.state[key] === 'object') {
-            Object.assign(store.state[key], {
-              ...data[key]
-            })
-          } else {
-            store.state[key] = data[key]
+          isValueChange = this.differValue(store.state[key], data[key])
+          // 当值发生变化时，再触发更新
+          if (isValueChange) {
+            // 如果当前vuex 存在相同的模块
+            if (store.state[key] && typeof store.state[key] === 'object') {
+              Object.assign(store.state[key], {
+                ...data[key]
+              })
+            } else {
+              store.state[key] = data[key]
+            }
           }
         })
         // 如果传入更新方法名字就执行更新
-        if (mutationMethodName) {
+        if (mutationMethodName && isValueChange) {
           localStorage.VUE_IFRAME_SHARE_UPDATE = true
           store.commit(mutationMethodName, {})
         }
@@ -115,18 +121,23 @@ class VuexIframeShare {
       // 接收父发送的数据
       event.on('VUE_IFRAME_SHARE_RECEIVE', ({ mutation, state }) => {
         const data = this.pick(state, only)
+        let isValueChange = false
         Object.keys(data).forEach((key: string) => {
-          // 如果当前vuex 存在相同的模块
-          if (store.state[key] && typeof store.state[key] === 'object') {
-            Object.assign(store.state[key], {
-              ...data[key]
-            })
-          } else {
-            store.state[key] = data[key]
+          isValueChange = this.differValue(store.state[key], data[key])
+          // 当值发生变化时，再触发更新
+          if (isValueChange) {
+            // 如果当前vuex 存在相同的模块
+            if (store.state[key] && typeof store.state[key] === 'object') {
+              Object.assign(store.state[key], {
+                ...data[key]
+              })
+            } else {
+              store.state[key] = data[key]
+            }
           }
         })
         // 如果传入更新方法名字就执行更新
-        if (mutationMethodName) {
+        if (mutationMethodName && isValueChange) {
           localStorage.VUE_IFRAME_SHARE_UPDATE = true
           store.commit(mutationMethodName, {})
         }
@@ -141,7 +152,10 @@ class VuexIframeShare {
         }
         if (mode === 'share') {
           const el = window.parent
-          this.send(el, { mutation, state })
+          // 避免非iframe中使用陷入死循环
+          if (el !== window) {
+            this.send(el, { mutation, state })
+          }
         }
       })
     }
@@ -202,6 +216,7 @@ class VuexIframeShare {
 
   private static storageSet(stateName: string = '', data: any) {
     if (!stateName) return
+    const original = this.getItem('vuex') || {}
     const vuexData = this.getItem('vuex') || {}
     const [rootModule, stateKey] = stateName.split('/')
     // 如果stateKey存在说明是modeles
@@ -215,14 +230,18 @@ class VuexIframeShare {
       vuexData[rootModule] = data
       this.setItem('vuex', vuexData)
     }
-    // 检查是否存在双向更新
-    if (this.option.mode === 'share') {
+    // 检查是否存在双向更新,如果是双向更新并且值发生改变就发送通知
+    if (this.option.mode === 'share' && this.differValue(original, vuexData)) {
       const el = window.parent
       const mutation = { type: 'vuex-iframe-share/storage', payload: {} }
       const state = vuexData
       this.send(el, { mutation, state })
     }
     return vuexData
+  }
+
+  private static differValue(valueA: unknown, valueB: unknown): boolean {
+    return !isEqual(valueA, valueB)
   }
 }
 
